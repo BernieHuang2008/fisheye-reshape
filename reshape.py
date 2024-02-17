@@ -3,7 +3,7 @@ from math import sqrt
 import numpy as np
 from tqdm import tqdm
 
-image = cv2.imread("input.png")
+image = cv2.imread("input2.jpg")
 
 # Reshape to 1000x1000
 image = cv2.resize(image, (1000, 1000))
