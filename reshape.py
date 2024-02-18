@@ -72,19 +72,16 @@ for i in tqdm(range(1, len(pixels))):
     output_image[i] = scaled[0]
 
 # construct widened image
-while True:
-    precision = 1 / 0.1
-    k = float(input("k: "))
-    b = float(input("b: ")) * pi
+precision = 1 / 0.1
 
-    img_left = output_image[:, : W // 2, :]
-    img_right = output_image[:, W // 2 :, :]
+img_left = output_image[:, : W // 2, :]
+img_right = output_image[:, W // 2 :, :]
 
-    thin_left = process(img_left, precision, 1, 1 * pi)
-    thin_right = process(img_right, precision, k, b)
+thin_left = process(img_left, precision, 1, pi)
+thin_right = img_right
 
-    # btw, change the order
-    thin_image = np.concatenate((thin_right, thin_left), axis=1)
-    cv2.imshow("thin_image", thin_image)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+# btw, change the order
+thin_image = np.concatenate((thin_right, thin_left), axis=1)
+cv2.imshow("thin_image", thin_image)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
