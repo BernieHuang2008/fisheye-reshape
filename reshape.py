@@ -3,17 +3,18 @@ from math import sqrt, sin, pi
 import numpy as np
 from tqdm import tqdm
 
+IMG_WIDTH = 1000
 
 def process(img, precision, k, b):
-    scales = [int(precision * (k * sin((i / 500) * pi + b))) for i in range(500)]
+    scales = [int(precision * (k * sin((i / (IMG_WIDTH/2)) * pi + b))) for i in range(IMG_WIDTH//2)]
     min_scale = min(scales)
     scales = [int(scale - min_scale) + 1 for scale in scales]
 
     img_width = sum(scales)
-    widened_image = np.zeros((1000, img_width, 3), dtype=np.uint8)
+    widened_image = np.zeros((IMG_WIDTH, img_width, 3), dtype=np.uint8)
 
     now_x = 0
-    for i in tqdm(range(0, 500)):
+    for i in tqdm(range(0, IMG_WIDTH//2)):
         start_x = now_x
         now_x += scales[i]
 
@@ -21,27 +22,27 @@ def process(img, precision, k, b):
         # from (1000, 3) expand to (1000, 1, 3)
         origin_slice = np.expand_dims(origin_slice, axis=1)
 
-        widen_slice = cv2.resize(origin_slice, (scales[i], 1000))
+        widen_slice = cv2.resize(origin_slice, (scales[i], IMG_WIDTH))
         widened_image[:, start_x:now_x] = widen_slice
 
     # Thin the image
-    thin_image = cv2.resize(widened_image, (500, 1000))
+    thin_image = cv2.resize(widened_image, (IMG_WIDTH // 2, IMG_WIDTH))
 
     return thin_image
 
 
 # Load the image
-image = cv2.imread("input.jpg")
+image = cv2.imread("lens_1.png")
 
 # reshape to 1000x1000
-image = cv2.resize(image, (1000, 1000))
+image = cv2.resize(image, (IMG_WIDTH, IMG_WIDTH))
 
-M = (500, 500)
+M = (IMG_WIDTH // 2, IMG_WIDTH // 2)
 step = 1
 
 pixels = []
 
-for r in tqdm(range(0, 1000, step)):
+for r in tqdm(range(0, IMG_WIDTH, step)):
     pxs1 = []
     pxs2 = []
     for x in range(M[0] - r, M[0] + r):
@@ -50,9 +51,9 @@ for r in tqdm(range(0, 1000, step)):
         y2 = -sqrt(r**2 - (x - M[0]) ** 2) + M[1]
 
         # on the circle
-        x = int(min(x, 999))
-        y1 = int(min(y1, 999))
-        y2 = int(min(y2, 999))
+        x = int(min(x, IMG_WIDTH - 1))
+        y1 = int(min(y1, IMG_WIDTH - 1))
+        y2 = int(min(y2, IMG_WIDTH - 1))
 
         pxs1.append(image[y1, x])
         pxs2.append(image[y2, x])
@@ -60,10 +61,10 @@ for r in tqdm(range(0, 1000, step)):
     pxs = pxs1 + pxs2[::-1]
     pixels.append(pxs)
 
-W = 1000
+W = IMG_WIDTH
 
 # construct image
-output_image = np.zeros((1000, 1000, 3), dtype=np.uint8)
+output_image = np.zeros((IMG_WIDTH, IMG_WIDTH, 3), dtype=np.uint8)
 
 for i in tqdm(range(1, len(pixels))):
     pxs = pixels[i]
